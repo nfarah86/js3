@@ -4,6 +4,7 @@ $(document).ready(function () {
     // function, this code only gets run when the document finishing loading.
 
     $("#message-form").submit(handleFormSubmit);
+    getMsg();
 });
 
 
@@ -21,8 +22,24 @@ function handleFormSubmit(evt) {
 
     // Reset the message container to be empty
     textArea.val("");
+
 }
 
+function getMsg(){
+
+    $.get("/api/wall/list", function(bigobject) {
+    
+        var messages_list = bigobject["messages"];
+        $("#message-container").empty();
+
+        for (var x= 0; x < messages_list.length; x++){
+             $("#message-container").prepend(
+                "<li class=list-group-item>" +messages_list[x]['message'] +"</li>");
+
+        }
+        }
+    );
+}
 
 /**
  * Makes AJAX call to the server and the message to it.
@@ -34,9 +51,21 @@ function addMessage(msg) {
         function (data) {
             console.log("addMessage: ", data);
             displayResultStatus(data.result);
+            getMsg();
         }
+    
     );
+    
 }
+
+$("#clearMsg").click(function() {
+    // alert("CLEAR CLICKED");
+
+    $.get("/api/wall/clear", function() {
+        getMsg();
+    });
+});
+
 
 
 /**
@@ -63,8 +92,14 @@ function displayResultStatus(resultMsg) {
         // many JS programmers use the name "self"; some others use "that".
         var self = this;
 
+
+
+
         setTimeout(function () {
             $(self).slideUp();
         }, 2000);
     });
 }
+
+
+
